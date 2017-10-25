@@ -5,8 +5,8 @@ import math
 def load_data(filepath):
     try:
         with open(filepath, encoding='utf-8') as file:
-            data = file.read()
-        return json.loads(data)
+            file_data = file.read()
+        return json.loads(file_data)
     except FileNotFoundError:
         print('Файл не найден')
 
