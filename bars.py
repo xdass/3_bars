@@ -1,5 +1,6 @@
 import json
 import math
+import sys
 
 
 def load_data(filepath):
@@ -8,7 +9,7 @@ def load_data(filepath):
             file_data = file.read()
         return json.loads(file_data)
     except FileNotFoundError:
-        print('Файл не найден')
+        return None
 
 
 def get_biggest_bar(bars):
@@ -29,15 +30,15 @@ def get_closest_bar(bars, longitude, latitude):
 
 
 def get_distance(cur_longitude, cur_latitude, place_longitude, place_latitude):
-    # радиус сферы (Земли)
-    rad = 6372795
-    # в радианах
-    lat1 = float(cur_latitude) * math.pi / 180
-    lat2 = place_latitude * math.pi / 180
-    long1 = float(cur_longitude) * math.pi / 180
-    long2 = place_longitude * math.pi / 180
+    radius = 6372795
+    lat1, lat2, long1, long2 = map(math.radians,
+                                   [
+                                       float(cur_latitude),
+                                       place_latitude,
+                                       float(cur_longitude),
+                                       place_longitude
+                                   ])
 
-    # косинусы и синусы широт и разницы долгот
     cl1 = math.cos(lat1)
     cl2 = math.cos(lat2)
     sl1 = math.sin(lat1)
@@ -46,30 +47,36 @@ def get_distance(cur_longitude, cur_latitude, place_longitude, place_latitude):
     cdelta = math.cos(delta)
     sdelta = math.sin(delta)
 
-    # вычисления длины большого круга
     y = math.sqrt(math.pow(cl2 * sdelta, 2) + math.pow(cl1 * sl2 - sl1 * cl2 * cdelta, 2))
     x = sl1 * sl2 + cl1 * cl2 * cdelta
     ad = math.atan2(y, x)
-    distance = ad * rad
+    distance = ad * radius
     return distance
 
+
 if __name__ == '__main__':
-    json_obj = load_data('bars.json')
-    all_bars = json_obj['features']
-    biggest_bar = get_biggest_bar(all_bars)
-    smallest_bar = get_smallest_bar(all_bars)
-    print('{} : количество посадочных мест {}'.format(
-        biggest_bar['properties']['Attributes']['Name'],
-        biggest_bar['properties']['Attributes']['SeatsCount'])
-    )
-    print('{} : количество посадочных мест {}'.format(
-        smallest_bar['properties']['Attributes']['Name'],
-        smallest_bar['properties']['Attributes']['SeatsCount'])
-    )
-    print('Поиск ближайшего бара по координатам')
-    place_lat, place_long = input('Введите коодинаты через пробел: ').split()
-    closest_bar = get_closest_bar(all_bars, place_lat, place_long)
-    print('Ближайший бар: {}, находится по адресу: {}'.format(
-        closest_bar['properties']['Attributes']['Name'],
-        closest_bar['properties']['Attributes']['Address']
-    ))
+    if len(sys.argv) > 1:
+        data_obj = load_data(sys.argv[1])
+        all_bars = data_obj['features']
+        biggest_bar = get_biggest_bar(all_bars)
+        smallest_bar = get_smallest_bar(all_bars)
+        print('{} : количество посадочных мест {}'.format(
+            biggest_bar['properties']['Attributes']['Name'],
+            biggest_bar['properties']['Attributes']['SeatsCount'])
+        )
+        print('{} : количество посадочных мест {}'.format(
+            smallest_bar['properties']['Attributes']['Name'],
+            smallest_bar['properties']['Attributes']['SeatsCount'])
+        )
+        print('Поиск ближайшего бара по координатам')
+        try:
+            place_lat, place_long = input('Введите коодинаты через пробел: ').split()
+            closest_bar = get_closest_bar(all_bars, place_lat, place_long)
+            print('Ближайший бар: {}, находится по адресу: {}'.format(
+                closest_bar['properties']['Attributes']['Name'],
+                closest_bar['properties']['Attributes']['Address']
+            ))
+        except ValueError:
+            print('Неверные координаты')
+    else:
+        print('Укажите имя файла: python bars.py <filename>')

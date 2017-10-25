@@ -11,7 +11,7 @@
 
 ```bash
 
-$ python bars.py # possibly requires call of python3 executive instead of just python
+$ python bars.py bars.json
 
 Спорт бар «Красная машина» : количество посадочных мест 450
 БАР. СОКИ : количество посадочных мест 0
