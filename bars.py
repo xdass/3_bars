@@ -31,35 +31,33 @@ def get_closest_bar(bars, longitude, latitude):
 
 def get_distance(cur_longitude, cur_latitude, place_longitude, place_latitude):
     # All calculations are taken from here: http://gis-lab.info/qa/great-circles.html
-    radius = 6372795  # Earth sphere radius in meters
-    lat1, lat2, long1, long2 = map(math.radians,  # Convert coords to radians
+    earth_sphere_radius = 6372795
+    lat1, lat2, long1, long2 = map(math.radians,
                                    [
                                        float(cur_latitude),
                                        place_latitude,
                                        float(cur_longitude),
                                        place_longitude
                                    ])
-    # cos and sin of latitude
     cl1 = math.cos(lat1)
     cl2 = math.cos(lat2)
     sl1 = math.sin(lat1)
     sl2 = math.sin(lat2)
-    # longitude difference
     delta = long2 - long1
     cdelta = math.cos(delta)
     sdelta = math.sin(delta)
 
-    # calculating the length of a large circle
     y = math.sqrt(math.pow(cl2 * sdelta, 2) + math.pow(cl1 * sl2 - sl1 * cl2 * cdelta, 2))
     x = sl1 * sl2 + cl1 * cl2 * cdelta
     ad = math.atan2(y, x)
-    distance = ad * radius
+    distance = ad * earth_sphere_radius
     return distance
 
 
 def print_bar_info(bar):
-    print('{} : количество посадочных мест {}'.format(
+    print('{} находится по аресу - {} : количество посадочных мест {}'.format(
         bar['properties']['Attributes']['Name'],
+        bar['properties']['Attributes']['Address'],
         bar['properties']['Attributes']['SeatsCount'])
     )
 
@@ -76,10 +74,7 @@ if __name__ == '__main__':
         try:
             place_lat, place_long = input('Введите коодинаты через пробел: ').split()
             closest_bar = get_closest_bar(all_bars, place_lat, place_long)
-            print('Ближайший бар: {}, находится по адресу: {}'.format(
-                closest_bar['properties']['Attributes']['Name'],
-                closest_bar['properties']['Attributes']['Address']
-            ))
+            print_bar_info(closest_bar)
         except ValueError:
             print('Неверные координаты')
     else:
