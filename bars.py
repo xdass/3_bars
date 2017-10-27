@@ -31,8 +31,8 @@ def get_closest_bar(bars, longitude, latitude):
 
 def get_distance(cur_longitude, cur_latitude, place_longitude, place_latitude):
     # All calculations are taken from here: http://gis-lab.info/qa/great-circles.html
-    radius = 6372795 # Earth sphere radius in meters
-    lat1, lat2, long1, long2 = map(math.radians, # Convert coords to radians
+    radius = 6372795  # Earth sphere radius in meters
+    lat1, lat2, long1, long2 = map(math.radians,  # Convert coords to radians
                                    [
                                        float(cur_latitude),
                                        place_latitude,
@@ -48,7 +48,7 @@ def get_distance(cur_longitude, cur_latitude, place_longitude, place_latitude):
     delta = long2 - long1
     cdelta = math.cos(delta)
     sdelta = math.sin(delta)
-    
+
     # calculating the length of a large circle
     y = math.sqrt(math.pow(cl2 * sdelta, 2) + math.pow(cl1 * sl2 - sl1 * cl2 * cdelta, 2))
     x = sl1 * sl2 + cl1 * cl2 * cdelta
@@ -57,20 +57,21 @@ def get_distance(cur_longitude, cur_latitude, place_longitude, place_latitude):
     return distance
 
 
+def print_bar_info(bar):
+    print('{} : количество посадочных мест {}'.format(
+        bar['properties']['Attributes']['Name'],
+        bar['properties']['Attributes']['SeatsCount'])
+    )
+
+
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         data_obj = load_data(sys.argv[1])
         all_bars = data_obj['features']
         biggest_bar = get_biggest_bar(all_bars)
         smallest_bar = get_smallest_bar(all_bars)
-        print('{} : количество посадочных мест {}'.format(
-            biggest_bar['properties']['Attributes']['Name'],
-            biggest_bar['properties']['Attributes']['SeatsCount'])
-        )
-        print('{} : количество посадочных мест {}'.format(
-            smallest_bar['properties']['Attributes']['Name'],
-            smallest_bar['properties']['Attributes']['SeatsCount'])
-        )
+        print_bar_info(biggest_bar)
+        print_bar_info(smallest_bar)
         print('Поиск ближайшего бара по координатам')
         try:
             place_lat, place_long = input('Введите коодинаты через пробел: ').split()
